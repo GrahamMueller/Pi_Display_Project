@@ -42,6 +42,67 @@ c_black = Color3(0, 0, 0)
 c_background = Color3(10, 25, 5)
 c_log_font = Color3(255, 255, 205)
 
+"""
+Handles the logger display window.  
+The program sends messages to be displayed on the screen.
+"""
+
+
+class LoggerDisplay:
+    """
+    font_size : Font size height
+    font_name : Path to font type.
+    dimensions : 2D list or tuple of size of logging area
+    position : 2D list or tuple of size of center of display
+    """
+
+    def __init__(
+        self,
+        font_size=16,
+        font_name="freesansbold.ttf",
+        dimensions=[100, 100],
+        position=[0, 0],
+    ):
+        # verify inputs are correct and useable
+        try:
+            self.font = pygame.font.Font(font_name, font_size)
+        except Exception as e:
+            raise e
+
+        self.font_dimension = Size(*self.font.size("a"))
+        self.message_list = []
+        self.dimensions = Size(*dimensions)
+        self.position = Size(*position)
+
+    """Adds a message to be displayed by the log display."""
+
+    def add_message(self, input_message):
+        try:
+            message = str(input_message)
+        except Exception as e:
+            raise e
+
+        chars_per_line = int(self.dimensions.width / self.font_dimension.width)
+        lines_total = int(self.dimensions.height / self.font_dimension.height)
+        print("chars per line : ", chars_per_line)
+        print("lines_limit :", lines_total)
+
+        word_wrapped_message = word_wrap_string(message, chars_per_line)
+
+        for m in word_wrapped_message:
+            self.message_list.append(m)
+
+        while len(self.message_list) > lines_total:
+            self.message_list.pop(0)
+
+    def render_onto_surface(self):
+        #Render objects onto a single surface that is provided.
+        #title
+        #----------
+        #Logger window
+        #....
+        #----------
+
 
 class ActivePiDisplay(object):
     log_font_size = 16
@@ -67,40 +128,11 @@ class ActivePiDisplay(object):
             ((self.fullscreen_size.width * log_width_perc), self.fullscreen_size.height)
         )
         # self.log_surface.set_center = (self.fullscreen_size.width * log_width_perc * 0.5, self.fullscreen_size.height * 0.5)
-        self.log_font = pygame.font.Font(
-            "freesansbold.ttf", ActivePiDisplay.log_font_size
-        )
-        self.log_message_list = []
+        # self.log_font = pygame.font.Font(
+        #     "freesansbold.ttf", ActivePiDisplay.log_font_size
+        # )
 
-    #move this into its own class.
-    def add_log_message(self, input_message):
-        # Take message, cut it down into set size sections
-        # We have an initial message
-        try:
-            message = str(input_message)
-        except Exception as e:
-            raise e
-        # Seperate input message into multiple lines.
-        fs_s = self.log_surface.get_size()
-        # print("Font size : ", font.size("a"))
-
-        # Split input message up so it auto wraps with new lines.
-
-        chars_per_line = int(fs_s[0] / self.log_font.size("a")[0])
-        lines_total = int(fs_s[1] / self.log_font.size("a")[1])
-        print("fs_1", fs_s[1], "   font[1]", self.log_font.size("a")[1])
-        print("lines:", lines_total)
-       # print("chars per line : ", chars_per_line)
-        word_wrapped_message = word_wrap_string(message, chars_per_line)
-        #print("word wrapped ", word_wrapped_message)
-        for m in word_wrapped_message:
-            self.log_message_list.append(m)
-
-        while len(self.log_message_list) > lines_total:
-            self.log_message_list.pop(0)
-        # self.lost_list.add(message)
-
-    # def render_log_messages   onto surface
+    # self.log_message_list = []
 
     #
     def render(self):
@@ -114,20 +146,20 @@ class ActivePiDisplay(object):
         # test
         y = 0
 
-        #Move this into its own class.
+        # Move this into its own class.
         test_m = ["one", "two", "three", "four", "five", "six"]
         for m in self.log_message_list:
             texttest = self.log_font.render(m, False, c_log_font)
-            #print("m:",y , "  - ",m)
+            # print("m:",y , "  - ",m)
             self.log_surface.blit(texttest, (0, y))
             y += 16
         # Colors thing
-        #self.log_surface.fill(c_red)
+        # self.log_surface.fill(c_red)
 
         # Draw log background onto the window
-        #self.fullscreen_surface.blit(self.log_surface, (0, 0))
+        # self.fullscreen_surface.blit(self.log_surface, (0, 0))
         # Draw text
-        #self.fullscreen_surface.blit(texttest, (0, 0))
+        # self.fullscreen_surface.blit(texttest, (0, 0))
         # textRect = text.get_rect()
         pygame.display.update()
 
@@ -145,16 +177,18 @@ def word_wrap_string(message, chars_per_line):
                 message_list[-1] += word + " "
             else:
                 message_list.append(word + " ")
-    #print("m ", message_list)
+    # print("m ", message_list)
     return message_list
 
 
 if __name__ == "__main__":
     active_display = ActivePiDisplay()
-    active_display.add_log_message("one two three four five six seven eight nine ten eleven twelve thirteen fourteen fiftheen sixteen seventeen")
+    active_display.add_log_message(
+        "one two three four five six seven eight nine ten eleven twelve thirteen fourteen fiftheen sixteen seventeen"
+    )
     i = 0
     for i in range(1, 80):
-         active_display.add_log_message("dah" + str(i))
+        active_display.add_log_message("dah" + str(i))
     while True:
         active_display.render()
 
